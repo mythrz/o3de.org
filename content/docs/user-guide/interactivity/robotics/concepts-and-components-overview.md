@@ -24,8 +24,7 @@ This is done through [rclcpp API](https://docs.ros.org/en/humble/p/rclcpp/genera
 
 ```cpp
 auto ros2Node = ROS2Interface::Get()->GetNode();
-AZStd::string fullTopic = ROS2Names::GetNamespacedName(GetNamespace(), m_MyTopic);
-m_myPublisher = ros2Node->create_publisher<sensor_msgs::msg::PointCloud2>(fullTopic.data(), QoS());
+m_myPublisher = ros2Node->create_publisher<sensor_msgs::msg::PointCloud2>(myTopic.c_str(), QoS());
 ```
 
 Note that QoS class is a simple wrapper to [`rclcpp::QoS`](https://docs.ros.org/en/humble/p/rclcpp/generated/classrclcpp_1_1QoS.html).
@@ -75,11 +74,23 @@ Four ROS 2 related Gems are provided. Each of them has a specific purpose:
   - `JointsArticulationControllerComponent` (available in `ROS2Controllers` Gem)
   - `JointsPIDControllerComponent` (available in `ROS2Controllers` Gem)
 
+### ROS 2 Node (Singleton)
+
+_ROS 2 Node_ (singleton) is created and managed by `ROS2SystemComponent`. It is the main entry point for communication with the ROS 2 ecosystem. This node is created when the simulation starts (with _ROS 2_ Gem enabled) and destroyed when the simulation stops. You can pass additional parameters to the node during its creation by using a registry key: `/O3DE/ROS2/NodeArguments`.
+
+You can find more details about using the registry settings in the [Settings Registry documentation](/docs/user-guide/settings/).
+
 ### Frames
 
 `ROS2FrameComponent` is a representation of an interesting physical part of the robot. It handles the spatio-temporal relationship between this part and other frames of reference. It also encapsulates namespaces, which help to distinguish between different robots and different parts of the robot, such as in the case of multiple identical sensors on one robot.
 
 All Sensors and the Robot Control components require `ROS2FrameComponent`.
+
+The ROS 2 frame component handles two main responsibilities:
+1. **Transformations**: It publishes the transformation of its entity in the TF2 tree. It also allows querying transformations to other frames.
+2. **Namespacing**: It provides a namespace for topics and services related to the entity.
+
+More details about frames can be found in the [Frames documentation](user-guide/components/reference/ros2/core/ros2-frame/).
 
 ### Sensors
 
